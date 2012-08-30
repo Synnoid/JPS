@@ -64,9 +64,63 @@ function warlock_destruction(self)
 			return "Curse of Elements"
 		end
 
-		if hasEmbers and UnitHealth("target") > 100000 --currently i'm hitting arround 100k minimum with this one, will update to scale with level 90 dps later.
-			return "Chaos Bolt"
+		if jps.debuffDuration("immolate", "target") == 0 then
+			return "Immolate"
 		end
+			
 
+		if UnitClassification("target") == "worldboss" then
+
+			--This is a boss
+
+			if cd("Dark Soul") > 20 then
+				--Darksoul is recharging, we can burn through our embers.
+				if hasEmbers then
+					if targetHp > 20 then
+						return "Chaos Bolt"
+					else
+						return "Shadowburn"
+					end
+				end
+
+				--Keep backdraft up
+				if jps.buffDuration("Backdraft") == 0 and
+					cd("conflagrate") == 0 then
+					return "conflagrate"
+				end
+
+				--Filler
+				return "Incinerate"
+			else
+				--Darksoul is almost off cooldown, lets stack up some embers
+				if jps.buffDuration("Backdraft") == 0 and
+					cd("conflagrate") == 0 then
+					return "conflagrate"
+				end
+				
+				--Do we have enough embers?
+				if embers >= 3 
+					and cd("Darksoul") == 0 then
+					return "Darksoul"
+				end
+
+				--Filler
+				return "Incinerate"
+			end
+		else
+			--Trash
+			if hasEmbers and UnitHealth("target") > 100000 then --currently i'm hitting arround 100k minimum with this one, will update to scale with level 90 dps later.
+				return "Chaos Bolt"
+			end
+
+			--Keep backdraft up
+			if jps.buffDuration("Backdraft") == 0 and
+				cd("conflagrate") == 0 then
+				return "conflagrate"
+			end
+
+			--Filler
+			return "Incinerate"
+		end
 	end
 end
